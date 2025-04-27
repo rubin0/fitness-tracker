@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./index.css";
 import { workoutPhases } from "./data/workoutPhases";
 import { useWorkoutTimer } from "./hooks/useWorkoutTimer";
 import { Phase } from "./types/types";
+import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/solid";
 
 const speakAsync = (text: string): Promise<void> =>
   new Promise((resolve) => {
@@ -21,6 +22,9 @@ function App() {
     useState<number>(0);
   const [currentSet, setCurrentSet] = useState<number>(0);
   const [currentExercise, setCurrentExercise] = useState<number>(0);
+
+  const [nextSet, setNextSet] = useState<string>("");
+  const [nextExercise, setNextExercise] = useState<string>("");
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
 
@@ -30,6 +34,25 @@ function App() {
     time: workoutPhases[currentSet].exercises[currentExercise].duration,
     onFinish: handleNextPhase,
   });
+
+  useEffect(() => {
+    checkNextExercise();
+  }, [currentSet, currentExercise]);
+
+  const checkNextExercise = () => {
+    if (currentExercise + 1 < workoutPhases[currentSet].exercises.length) {
+      setNextSet(workoutPhases[currentSet].name);
+      setNextExercise(
+        workoutPhases[currentSet].exercises[currentExercise + 1].name
+      );
+    } else if (currentSet + 1 < workoutPhases.length) {
+      setNextSet(workoutPhases[currentSet + 1].name);
+      setNextExercise(workoutPhases[currentSet + 1].exercises[0].name);
+    } else {
+      setNextSet("DONE");
+      setNextExercise("DONE");
+    }
+  };
 
   async function handleNextPhase() {
     const current = workoutPhases[currentSet];
@@ -147,7 +170,7 @@ function App() {
       return;
     }
 
-    handleNextPhase(); // ricorsivo se manca un phase match
+    handleNextPhase();
   }
 
   const startWorkout = async (): Promise<void> => {
@@ -193,55 +216,136 @@ function App() {
     setTimeLeft(workoutPhases[0].exercises[0].duration);
     speechSynthesis.cancel();
   };
+  const back = useCallback(() => {
+    if (currentExercise !== 0) {
+      setCurrentExercise(currentExercise - 1);
+      setTimeLeft(
+        workoutPhases[currentSet].exercises[currentExercise - 1].duration
+      );
+    } else if (currentExercise === 0 && currentSet !== 0) {
+      setCurrentSet(currentSet - 1);
+      setCurrentExercise(workoutPhases[currentSet - 1].exercises.length - 1);
+      setTimeLeft(
+        workoutPhases[currentSet - 1].exercises[
+          workoutPhases[currentSet - 1].exercises.length - 1
+        ].duration
+      );
+    } else {
+      setTimeLeft(workoutPhases[0].exercises[0].duration);
+    }
+
+    setPhase("exercise");
+  }, [currentExercise, currentSet, setTimeLeft]);
+
+  const forward = useCallback(() => {
+    if (currentExercise + 1 < workoutPhases[currentSet].exercises.length) {
+      setCurrentExercise(currentExercise + 1);
+      setTimeLeft(
+        workoutPhases[currentSet].exercises[currentExercise + 1].duration
+      );
+    } else if (currentSet + 1 < workoutPhases.length) {
+      setCurrentSet(currentSet + 1);
+      setCurrentExercise(0);
+      setTimeLeft(workoutPhases[currentSet + 1].exercises[0].duration);
+    }
+    setPhase("exercise");
+  }, [currentExercise, currentSet, setTimeLeft]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.code === "Space") {
+        event.preventDefault();
+        if (isRunning) {
+          setIsPaused((prev) => !prev);
+        }
+      } else if (event.code === "ArrowLeft") {
+        event.preventDefault();
+        if (isRunning) {
+          back();
+        }
+      } else if (event.code === "ArrowRight") {
+        event.preventDefault();
+        if (isRunning) {
+          forward();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isRunning, back, forward]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 py-8 bg-gray-100">
       <h1 className="text-4xl font-bold text-gray-900 mb-6">Workout Timer</h1>
 
-      <div className="mb-4 text-center">
-        <p className="text-xl font-medium text-gray-800">
-          Current Set:{" "}
-          <span className="font-bold">{workoutPhases[currentSet].name}</span>
-        </p>
-        {workoutPhases[currentSet].repetition != null && (
-          <p className="text-md text-gray-600">
-            Repetition {currentSetRepetition + 1} of{" "}
-            {workoutPhases[currentSet].repetition}
-          </p>
-        )}
+      <div className="relative flex flex-col items-center justify-center w-full mb-8">
+        {/* TIMER CENTRALE */}
+        <div className="flex flex-col items-center">
+          <div className="mb-4 text-center">
+            <p className="text-xl font-medium text-gray-800">
+              Current Set:{" "}
+              <span className="font-bold">
+                {workoutPhases[currentSet].name}
+              </span>
+            </p>
+            {workoutPhases[currentSet].repetition != null && (
+              <p className="text-md text-gray-600">
+                Repetition {currentSetRepetition + 1} of{" "}
+                {workoutPhases[currentSet].repetition}
+              </p>
+            )}
+          </div>
+
+          <div className="mb-4 text-center">
+            <p className="text-2xl font-semibold text-gray-800">
+              {workoutPhases[currentSet].exercises[currentExercise].name}
+            </p>
+            {workoutPhases[currentSet].exercises[currentExercise].repetition !=
+              null && (
+              <p className="text-md text-gray-600">
+                Repetition {currentExerciseRepetition + 1} of{" "}
+                {
+                  workoutPhases[currentSet].exercises[currentExercise]
+                    .repetition
+                }
+              </p>
+            )}
+          </div>
+
+          {phase === "exercise-rest" && (
+            <p className="text-blue-500 text-lg mb-2 font-medium">
+              Rest between exercises
+            </p>
+          )}
+          {phase === "set-rest" && (
+            <p className="text-purple-500 text-lg mb-2 font-medium">
+              Rest between sets
+            </p>
+          )}
+          {phase === "inter-rep-rest" && (
+            <p className="text-cyan-500 text-lg mb-2 font-medium">
+              Rest between repetitions
+            </p>
+          )}
+
+          <div className="text-6xl font-mono text-gray-800 mb-6">
+            {timeLeft}s
+          </div>
+        </div>
+
+        {/* BOX NEXT posizionato */}
+        <div className="absolute right-0 top-0 flex flex-col items-center justify-center w-[250px] h-[250px] text-center">
+          <p className="text-lg font-semibold mb-2">Up Next</p>
+          <p className="text-xl font-bold">{nextSet}</p>
+          <p className="text-md">{nextExercise}</p>
+        </div>
       </div>
 
-      <div className="mb-4 text-center">
-        <p className="text-2xl font-semibold text-gray-800">
-          {workoutPhases[currentSet].exercises[currentExercise].name}
-        </p>
-        {workoutPhases[currentSet].exercises[currentExercise].repetition !=
-          null && (
-          <p className="text-md text-gray-600">
-            Repetition {currentExerciseRepetition + 1} of{" "}
-            {workoutPhases[currentSet].exercises[currentExercise].repetition}
-          </p>
-        )}
-      </div>
-
-      {phase === "exercise-rest" && (
-        <p className="text-blue-500 text-lg mb-2 font-medium">
-          Rest between exercises
-        </p>
-      )}
-      {phase === "set-rest" && (
-        <p className="text-purple-500 text-lg mb-2 font-medium">
-          Rest between sets
-        </p>
-      )}
-      {phase === "inter-rep-rest" && (
-        <p className="text-cyan-500 text-lg mb-2 font-medium">
-          Rest between repetitions
-        </p>
-      )}
-
-      <div className="text-6xl font-mono text-gray-800 mb-6">{timeLeft}s</div>
-
+      {/* Progress Bar + Buttons */}
       <div className="w-full h-2 bg-gray-300 rounded-full overflow-hidden mb-6">
         <div
           className="h-full bg-green-500 transition-all"
@@ -257,6 +361,14 @@ function App() {
       </div>
 
       <div className="flex space-x-4">
+        <button
+          onClick={back}
+          disabled={!isRunning}
+          className="flex items-center px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white font-bold rounded-xl shadow transition-transform transform hover:scale-105"
+        >
+          <ArrowLeftIcon className="h-5 w-5 mr-2" />
+          Back
+        </button>
         <button
           onClick={startWorkout}
           disabled={isRunning}
@@ -279,6 +391,14 @@ function App() {
           className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl shadow"
         >
           Reset
+        </button>
+        <button
+          onClick={forward}
+          disabled={!isRunning}
+          className="flex items-center px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white font-bold rounded-xl shadow transition-transform transform hover:scale-105"
+        >
+          Forward
+          <ArrowRightIcon className="h-5 w-5 ml-2" />
         </button>
       </div>
     </div>
