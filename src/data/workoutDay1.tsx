@@ -4,72 +4,59 @@ import { Set } from "@/types/types";
 export const workoutPhases: Set[] = [
   {
     name: "Warmup",
-    exercises: [
-      {
-        name: "Jump Rope",
-        duration: 60,
-        repetition: 5,
-        interRepetitionRest: 20,
-      },
-    ],
+    exercises: [{ name: "Jump Rope", duration: 120 }],
     afterSetRest: 90,
   },
   {
     name: "Chest & Shoulders",
     exercises: [
       {
-        name: "Dumbbell Chest Press (10-15kg) x8-12",
+        name: "Dumbbell Chest Press (10-15kg) slow 4-1",
         duration: 60,
-        repetition: 3,
+        repetition: 4,
         interRepetitionRest: 30,
         afterExerciseRest: 60,
       },
       {
-        name: "Push-Up (Decline/Standard) x8-12",
+        name: "Push-Up (Decline/Standard) max (target 8-12 rip)",
         duration: 45,
         repetition: 3,
         interRepetitionRest: 30,
         afterExerciseRest: 60,
       },
       {
-        name: "Dumbbell Pullover (10-15kg) x10",
+        name: "Dumbbell Pullover x 12 (10-15kg)",
         duration: 60,
-        repetition: 3,
+        repetition: 4,
         interRepetitionRest: 30,
         afterExerciseRest: 60,
       },
       {
-        name: "Shoulder Press (15kg) x8-12",
+        name: "Shoulder Press (15kg) (target 8-10 rip) slow 4-1",
         duration: 60,
-        repetition: 3,
+        repetition: 4,
         interRepetitionRest: 30,
         afterExerciseRest: 60,
+      },
+      {
+        name: "Lateral Raise x 15(7kg/elastico)",
+        duration: 45,
+        repetition: 3,
+        interRepetitionRest: 30,
+        afterExerciseRest: 30,
       },
     ],
     afterSetRest: 120,
   },
   {
-    name: "Arms",
-    exercises: [
-      {
-        name: "French Press x12 (10kg+polsiere)",
-        duration: 45,
-        afterExerciseRest: 30,
-      },
-      {
-        name: "Diamond Push-Up x max reps",
-        duration: 45,
-        afterExerciseRest: 30,
-      },
-    ],
-    afterSetRest: 90,
-  },
-  {
     name: "Core",
     exercises: [
-      { name: "Plank", duration: 60, afterExerciseRest: 20 },
-      { name: "Mountain Climbers", duration: 40, afterExerciseRest: 20 },
-      { name: "Boat Pose", duration: 40, afterExerciseRest: 20 },
+      {
+        name: "Plank to Push-Up x 10",
+        duration: 45,
+        repetition: 3,
+        interRepetitionRest: 30,
+      },
     ],
     afterSetRest: 90,
   },

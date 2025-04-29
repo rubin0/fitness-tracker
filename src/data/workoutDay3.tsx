@@ -3,36 +3,29 @@ import { Set } from "@/types/types";
 export const workoutPhases: Set[] = [
   {
     name: "Warmup",
-    exercises: [
-      {
-        name: "Jump Rope",
-        duration: 60,
-        repetition: 5,
-        interRepetitionRest: 20,
-      },
-    ],
+    exercises: [{ name: "Jump Rope", duration: 120 }],
     afterSetRest: 90,
   },
   {
     name: "Legs",
     exercises: [
       {
-        name: "Goblet Squat (15kg+polsiere) x10",
+        name: "Goblet Squat x 12 (15kg+polsiere, tempo 3-0-1)",
         duration: 60,
-        repetition: 3,
+        repetition: 4,
         interRepetitionRest: 30,
         afterExerciseRest: 60,
       },
       {
-        name: "Romanian Deadlift (15kg manubri) x10",
+        name: "Romanian Deadlift x 10 (15kg manubri)",
         duration: 60,
-        repetition: 3,
+        repetition: 4,
         interRepetitionRest: 30,
         afterExerciseRest: 60,
       },
       {
-        name: "Forward Lunges x12 per gamba",
-        duration: 60,
+        name: "Bulgarian Split Squat x8 (10-15kg)",
+        duration: 120,
         repetition: 3,
         interRepetitionRest: 30,
         afterExerciseRest: 60,
@@ -50,9 +43,20 @@ export const workoutPhases: Set[] = [
   {
     name: "Full Body + Core",
     exercises: [
-      { name: "Push-Up", duration: 45, afterExerciseRest: 30 },
-      { name: "Plank", duration: 60, afterExerciseRest: 30 },
-      { name: "Mountain Climbers", duration: 40, afterExerciseRest: 30 },
+      {
+        name: "Push-Up to max (target 10 rip)",
+        duration: 45,
+        repetition: 3,
+        interRepetitionRest: 30,
+        afterExerciseRest: 30,
+      },
+      {
+        name: "Russian Twist (peso leggero) x 10 x side",
+        duration: 40,
+        repetition: 3,
+        interRepetitionRest: 20,
+        afterExerciseRest: 20,
+      },
     ],
     afterSetRest: 90,
   },
