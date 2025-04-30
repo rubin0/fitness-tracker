@@ -2,9 +2,27 @@ import { Set } from "@/types/types";
 
 export const workoutPhases: Set[] = [
   {
+    name: "Back Stretch",
+    exercises: [
+      { name: "Bottom-to-Heels Stretch x10", duration: 60 },
+      { name: "Opposite Arm/Leg Raises x10", duration: 60 },
+      { name: "Back Extensions x10", duration: 60 },
+      { name: "Bridge x10", duration: 60 },
+      { name: "Knee Roll x10", duration: 60 },
+    ],
+    afterSetRest: 20,
+  },
+  {
     name: "Warmup",
-    exercises: [{ name: "Jump Rope", duration: 120 }],
-    afterSetRest: 90,
+    exercises: [
+      {
+        name: "Jump Rope",
+        duration: 60,
+        repetition: 5,
+        interRepetitionRest: 30,
+      },
+    ],
+    afterSetRest: 120,
   },
   {
     name: "Legs",
