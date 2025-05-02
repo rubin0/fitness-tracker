@@ -1,11 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { workoutType as workoutPhases } from "../data/workoutDay2";
 import { useWorkoutTimer } from "./useWorkoutTimer";
 import { useSpeech } from "./useSpeech";
+import { Phase, WorkoutSet } from "../types/types";
 
-import { Phase } from "../types/types";
-
-export function useWorkoutLogic() {
+export function useWorkoutLogic(workout: WorkoutSet[] = []) {
     const speakAsync = useSpeech();
     const handleNextPhaseRef = useRef<() => Promise<void>>(async () => { });
     const [phase, setPhase] = useState<Phase>("exercise");
@@ -18,21 +16,22 @@ export function useWorkoutLogic() {
     const [isRunning, setIsRunning] = useState<boolean>(false);
     const [isPaused, setIsPaused] = useState<boolean>(false);
 
-
     const checkNextExercise = useCallback(() => {
-        if (currentExercise + 1 < workoutPhases[currentSet].exercises.length) {
-            setNextSet(workoutPhases[currentSet].name);
+        if (!workout.length) return;
+
+        if (currentExercise + 1 < workout[currentSet].exercises.length) {
+            setNextSet(workout[currentSet].name);
             setNextExercise(
-                workoutPhases[currentSet].exercises[currentExercise + 1].name
+                workout[currentSet].exercises[currentExercise + 1].name
             );
-        } else if (currentSet + 1 < workoutPhases.length) {
-            setNextSet(workoutPhases[currentSet + 1].name);
-            setNextExercise(workoutPhases[currentSet + 1].exercises[0].name);
+        } else if (currentSet + 1 < workout.length) {
+            setNextSet(workout[currentSet + 1].name);
+            setNextExercise(workout[currentSet + 1].exercises[0].name);
         } else {
             setNextSet("DONE");
             setNextExercise("DONE");
         }
-    }, [currentSet, currentExercise]);
+    }, [currentSet, currentExercise, workout]);
 
     useEffect(() => {
         checkNextExercise();
@@ -42,13 +41,15 @@ export function useWorkoutLogic() {
     const { timeLeft, setTimeLeft } = useWorkoutTimer({
         isRunning,
         isPaused,
-        time: workoutPhases[currentSet].exercises[currentExercise].duration,
+        time: workout.length ? workout[currentSet].exercises[currentExercise].duration : 0,
         onFinish: () => handleNextPhaseRef.current(),
     });
 
     // Main phase transition logic
     const handleNextPhase = useCallback(async () => {
-        const current = workoutPhases[currentSet];
+        if (!workout.length) return;
+
+        const current = workout[currentSet];
         const exerciseData = current.exercises[currentExercise];
         const setRep = current.repetition ?? 1;
         const exeRep = exerciseData.repetition ?? 1;
@@ -131,8 +132,8 @@ export function useWorkoutLogic() {
             }
             // Move to next set or finish
             const nextSetIdx = currentSet + 1;
-            if (nextSetIdx < workoutPhases.length) {
-                const next = workoutPhases[nextSetIdx];
+            if (nextSetIdx < workout.length) {
+                const next = workout[nextSetIdx];
                 setCurrentSet(nextSetIdx);
                 setCurrentSetRepetition(0);
                 setCurrentExercise(0);
@@ -158,33 +159,35 @@ export function useWorkoutLogic() {
         currentSetRepetition,
         setTimeLeft,
         speakAsync,
+        workout,
     ]);
 
     useEffect(() => {
         handleNextPhaseRef.current = handleNextPhase;
     }, [handleNextPhase]);
 
-
     // Control handlers
     const startWorkout = useCallback(async () => {
+        if (!workout.length) return;
+
         setPhase("exercise");
-        const setName = workoutPhases[currentSet].name.toLowerCase();
+        const setName = workout[currentSet].name.toLowerCase();
         const exeName =
-            workoutPhases[currentSet].exercises[currentExercise].name.toLowerCase();
+            workout[currentSet].exercises[currentExercise].name.toLowerCase();
 
         await speakAsync(`Set: ${setName}`);
-        if (workoutPhases[currentSet].repetition != null) {
+        if (workout[currentSet].repetition != null) {
             await speakAsync(
-                `Repetition: ${currentSetRepetition + 1} of ${workoutPhases[currentSet].repetition
+                `Repetition: ${currentSetRepetition + 1} of ${workout[currentSet].repetition
                 }`
             );
         }
         await speakAsync(`Exercise: ${exeName}`);
         if (
-            workoutPhases[currentSet].exercises[currentExercise].repetition != null
+            workout[currentSet].exercises[currentExercise].repetition != null
         ) {
             await speakAsync(
-                `Exercise Repetition: ${currentExerciseRepetition + 1} of ${workoutPhases[currentSet].exercises[currentExercise].repetition
+                `Exercise Repetition: ${currentExerciseRepetition + 1} of ${workout[currentSet].exercises[currentExercise].repetition
                 }`
             );
         }
@@ -197,6 +200,7 @@ export function useWorkoutLogic() {
         currentSetRepetition,
         currentExerciseRepetition,
         speakAsync,
+        workout,
     ]);
 
     const pauseWorkout = useCallback(() => {
@@ -204,74 +208,73 @@ export function useWorkoutLogic() {
     }, []);
 
     const resetWorkout = useCallback(() => {
+        if (!workout.length) return;
+
         setCurrentSetRepetition(0);
         setCurrentExerciseRepetition(0);
         setIsRunning(false);
         setIsPaused(false);
         setCurrentSet(0);
         setCurrentExercise(0);
-        setTimeLeft(workoutPhases[0].exercises[0].duration);
+        setTimeLeft(workout[0].exercises[0].duration);
         speechSynthesis.cancel();
-    }, [setTimeLeft]);
+    }, [setTimeLeft, workout]);
 
     const back = useCallback(() => {
+        if (!workout.length) return;
+
         if (currentExercise !== 0) {
             setCurrentExercise(currentExercise - 1);
             setTimeLeft(
-                workoutPhases[currentSet].exercises[currentExercise - 1].duration
+                workout[currentSet].exercises[currentExercise - 1].duration
             );
         } else if (currentExercise === 0 && currentSet !== 0) {
             setCurrentSet(currentSet - 1);
             setCurrentExercise(
-                workoutPhases[currentSet - 1].exercises.length - 1
+                workout[currentSet - 1].exercises.length - 1
             );
             setTimeLeft(
-                workoutPhases[currentSet - 1].exercises[
-                    workoutPhases[currentSet - 1].exercises.length - 1
+                workout[currentSet - 1].exercises[
+                    workout[currentSet - 1].exercises.length - 1
                 ].duration
             );
         } else {
-            setTimeLeft(workoutPhases[0].exercises[0].duration);
+            setTimeLeft(workout[0].exercises[0].duration);
         }
         setPhase("exercise");
     }, [
         currentExercise,
         currentSet,
         setTimeLeft,
+        workout,
     ]);
 
     const forward = useCallback(() => {
-        if (currentExercise + 1 < workoutPhases[currentSet].exercises.length) {
+        if (!workout.length) return;
+
+        if (currentExercise + 1 < workout[currentSet].exercises.length) {
             setCurrentExercise(currentExercise + 1);
             setTimeLeft(
-                workoutPhases[currentSet].exercises[currentExercise + 1].duration
+                workout[currentSet].exercises[currentExercise + 1].duration
             );
-        } else if (currentSet + 1 < workoutPhases.length) {
+        } else if (currentSet + 1 < workout.length) {
             setCurrentSet(currentSet + 1);
             setCurrentExercise(0);
-            setTimeLeft(workoutPhases[currentSet + 1].exercises[0].duration);
+            setTimeLeft(workout[currentSet + 1].exercises[0].duration);
         }
         setPhase("exercise");
-    }, [
-        currentExercise,
-        currentSet,
-        setTimeLeft,
-    ]);
-
-    // Presentation values
-    const repetitionInfo =
-        phase === "exercise"
-            ? `Repetition: ${currentExerciseRepetition + 1} of ${workoutPhases[currentSet].exercises[currentExercise].repetition ?? 1
-            }`
-            : undefined;
+    }, [currentExercise, currentSet, setTimeLeft, workout]);
 
     return {
         phase,
         timeLeft,
-        currentSetName: workoutPhases[currentSet].name,
-        currentExerciseName: workoutPhases[currentSet].exercises[currentExercise].name,
-        repetitionInfo,
-        nextUp: { nextSet, nextExercise },
+        currentSetName: workout.length ? workout[currentSet].name : "",
+        currentExerciseName: workout.length ? workout[currentSet].exercises[currentExercise].name : "",
+        repetitionInfo: workout.length ? `Set: ${currentSetRepetition + 1}/${workout[currentSet].repetition ?? 1} | Exercise: ${currentExerciseRepetition + 1}/${workout[currentSet].exercises[currentExercise].repetition ?? 1}` : "",
+        nextUp: {
+            nextSet,
+            nextExercise,
+        },
         isRunning,
         isPaused,
         handlers: {
