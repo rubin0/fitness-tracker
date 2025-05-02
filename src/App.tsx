@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import "./index.css";
-import { workoutPhases } from "./data/workoutPhases";
+//import { workoutPhases } from "./data/workoutPhases";
+import { workoutPhases } from "./data/workoutDay1";
 import { useWorkoutTimer } from "./hooks/useWorkoutTimer";
 import { Phase } from "./types/types";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/solid";
