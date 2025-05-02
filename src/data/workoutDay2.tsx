@@ -75,7 +75,12 @@ export const workoutPhases: Set[] = [
         duration: 40,
         afterExerciseRest: 20,
       },
+      {
+        name: "Single Leg Raise",
+        repetition: 3,
+        duration: 40,
+        afterExerciseRest: 20,
+      },
     ],
-    afterSetRest: 90,
   },
 ];
