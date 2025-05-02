@@ -52,10 +52,10 @@ export const WorkoutSelector = ({ onWorkoutSelect }: WorkoutSelectorProps) => {
   };
 
   return (
-    <div className="mb-4">
+    <div className="w-full px-4 py-3 bg-white rounded-lg shadow-sm">
       <label
         htmlFor="workout-select"
-        className="block text-sm font-medium text-gray-700 mb-2"
+        className="block text-base font-semibold text-gray-800 mb-2"
       >
         Select Workout
       </label>
@@ -63,7 +63,16 @@ export const WorkoutSelector = ({ onWorkoutSelect }: WorkoutSelectorProps) => {
         id="workout-select"
         value={selectedWorkout}
         onChange={handleWorkoutChange}
-        className="block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        className="block w-full px-4 py-3 text-base bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none cursor-pointer"
+        style={{
+          WebkitAppearance: "none",
+          MozAppearance: "none",
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "right 0.75rem center",
+          backgroundSize: "1.5em 1.5em",
+          paddingRight: "2.5rem",
+        }}
       >
         <option value="">Select a workout...</option>
         {workouts.map((workout) => (
