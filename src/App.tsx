@@ -1,10 +1,24 @@
 import "./index.css";
-//import { workoutPhases } from "./data/workoutPhases";
 import { Header } from "./components/Header";
 import { NextUp } from "./components/NextUp";
 import { useWorkoutLogic } from "./hooks/useWorkoutLogic";
 import { TimerDisplay } from "./components/TimerDisplay";
 import Controls from "./components/Controls";
+import { useState } from "react";
+import { WorkoutSet } from "./types/types";
+import { workoutType as test } from "./data/workoutPhasesTest";
+
+// Dynamically load workout modules
+const modules = import.meta.glob<{ default: WorkoutSet[] }>("./data/*.ts", {
+  eager: true,
+});
+const workoutsMap: Record<string, string> = {};
+for (const path in modules) {
+  const match = path.match(/\/([^/]+)\.tsx?$/);
+  if (match) {
+    workoutsMap[match[1]] = path;
+  }
+}
 
 function App() {
   const {

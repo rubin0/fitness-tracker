@@ -6,7 +6,7 @@ export type Exercise = {
     afterExerciseRest?: number | null;
 }
 
-export type Set = {
+export type WorkoutSet = {
     name: string;
     exercises: Exercise[];
     afterSetRest?: number | null;

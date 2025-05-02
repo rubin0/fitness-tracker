@@ -1,7 +1,6 @@
-// File: dayB.ts
-import { Set } from "@/types/types";
+import { WorkoutSet } from "@/types/types";
 
-export const workoutPhases: Set[] = [
+export const workoutType: WorkoutSet[] = [
   {
     name: "Back Stretch",
     exercises: [

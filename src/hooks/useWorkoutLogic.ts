@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { workoutPhases } from "../data/workoutDay1";
+import { workoutType as workoutPhases } from "../data/workoutDay2";
 import { useWorkoutTimer } from "./useWorkoutTimer";
 import { useSpeech } from "./useSpeech";
+
 import { Phase } from "../types/types";
 
 export function useWorkoutLogic() {
@@ -16,6 +17,7 @@ export function useWorkoutLogic() {
     const [nextExercise, setNextExercise] = useState<string>("");
     const [isRunning, setIsRunning] = useState<boolean>(false);
     const [isPaused, setIsPaused] = useState<boolean>(false);
+
 
     const checkNextExercise = useCallback(() => {
         if (currentExercise + 1 < workoutPhases[currentSet].exercises.length) {
@@ -267,8 +269,7 @@ export function useWorkoutLogic() {
         phase,
         timeLeft,
         currentSetName: workoutPhases[currentSet].name,
-        currentExerciseName:
-            workoutPhases[currentSet].exercises[currentExercise].name,
+        currentExerciseName: workoutPhases[currentSet].exercises[currentExercise].name,
         repetitionInfo,
         nextUp: { nextSet, nextExercise },
         isRunning,
